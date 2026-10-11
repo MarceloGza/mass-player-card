@@ -445,7 +445,10 @@ export class ActivePlayerController {
   }
   async actionGetCurrentQueue(): Promise<getQueueResponse> {
     const entity_id = this.activeEntityID;
-    if (!playerIsAvailable(this.hass, entity_id)) {
+    if (
+      !playerIsAvailable(this.hass, entity_id) ||
+      !this.hass.states[entity_id]?.attributes.active_queue
+    ) {
       return {
         queue_id: "",
         active: false,
