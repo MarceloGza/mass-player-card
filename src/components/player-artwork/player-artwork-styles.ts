@@ -45,7 +45,8 @@ export default css`
   wa-carousel.large::part(base) {
     column-gap: 0px;
   }
-  wa-carousel-item img {
+  wa-carousel-item img,
+  #carousel.slot img {
     max-height: 100%;
     max-width: 100%;
     aspect-ratio: 1;

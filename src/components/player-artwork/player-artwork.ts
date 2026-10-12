@@ -253,6 +253,9 @@ export class MassPlayerArtwork extends LitElement {
     this._pushingArtwork = false;
   }
   protected _pushQueueArtwork() {
+    if (!this.activePlayer.attributes.active_queue) {
+      return;
+    }
     const queue = this.queue;
     const activeIdx = this.getActiveIndex();
     if (!queue || (!activeIdx && activeIdx != 0) || !this.activeSlide) {
@@ -416,6 +419,24 @@ export class MassPlayerArtwork extends LitElement {
   }
 
   protected renderActiveItem(): TemplateResult {
+    if (!this.activePlayer.attributes.active_queue) {
+      const { state: playbackState, attributes } = this.activePlayer;
+      const url = attributes.entity_picture_local ?? attributes.entity_picture;
+      if ((playbackState !== "playing" && playbackState !== "paused") || !url) {
+        return this.renderEmptyQueue();
+      }
+      const size = `${this.playerConfig.layout.artwork_size} ${this.Config.panel ? "panel" : ""}`;
+      return html`
+        <div id="carousel" class="slot ${size}">
+          <img
+            class="artwork ${size}"
+            id="img-playing"
+            src="${url}"
+            loading="lazy"
+          />
+        </div>
+      `;
+    }
     if (!this.queue?.length) {
       return this.renderEmptyQueue();
     }
@@ -446,6 +467,9 @@ export class MassPlayerArtwork extends LitElement {
   }
 
   protected render(): TemplateResult {
+    if (!this.activePlayer.attributes.active_queue) {
+      return this.renderActiveItem();
+    }
     const size = `${this.playerConfig.layout.artwork_size} ${this.Config.panel ? ` panel` : ``}`;
     return html`
       <wa-carousel
@@ -459,6 +483,20 @@ export class MassPlayerArtwork extends LitElement {
     `;
   }
   protected updated(): void {
+    if (this.controller.ActivePlayer) {
+      this.controller.ActivePlayer.carouselElement = this.carouselElement;
+    }
+    if (!this.activePlayer.attributes.active_queue) {
+      this._observer?.disconnect();
+      this._observer = undefined;
+      this._slidesInserted = false;
+      if (this._interval) {
+        clearInterval(this._interval);
+        this._interval = undefined;
+        this._intervalSet = false;
+      }
+      return;
+    }
     if (this.activeSlide && this.queue && !this._slidesInserted) {
       this._slidesInserted = true;
       void this.pushQueueArtwork();
