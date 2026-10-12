@@ -432,6 +432,9 @@ export class ActivePlayerController {
     if (!isActive(this.hass, this.activeMediaPlayer, this.activeEntityConfig)) {
       return 0;
     }
+    if (!this.activeMediaPlayer?.attributes.active_queue) {
+      return this.activeMediaPlayer?.attributes.media_position ?? 0;
+    }
     const current_queue = await this.actionGetCurrentQueue();
     const elapsed = current_queue.elapsed_time;
     return elapsed;
@@ -439,6 +442,9 @@ export class ActivePlayerController {
   public async getPlayerActiveItemDuration(): Promise<number> {
     if (!isActive(this.hass, this.activeMediaPlayer, this.activeEntityConfig)) {
       return 1;
+    }
+    if (!this.activeMediaPlayer?.attributes.active_queue) {
+      return this.activeMediaPlayer?.attributes.media_duration ?? 1;
     }
     const current_queue = await this.actionGetCurrentQueue();
     return current_queue.current_item?.duration ?? 1;

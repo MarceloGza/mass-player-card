@@ -108,7 +108,9 @@ export function isActive(
   const inactive_states = entity_config.inactive_when_idle
     ? ["off", "idle"]
     : ["off"];
-  const not_off = !inactive_states.includes(entity.state);
+  const not_off = ![...inactive_states, "unknown", "unavailable"].includes(
+    entity.state,
+  );
   const has_item = !!entity.attributes.media_content_id;
   const is_mass = entity.attributes.app_id == MUSIC_ASSISTANT_APP_NAME;
   const has_queue = !!entity.attributes.active_queue;
@@ -118,8 +120,16 @@ export function isActive(
   const updated_recently =
     now_ms - updated_ms <= MAX_ACTIVE_LAST_ACTIVE_DURATION ||
     !entity_config.inactive_when_not_updated;
+  const external_playback =
+    !is_mass &&
+    !!entity.attributes.app_id &&
+    ["playing", "paused", "buffering"].includes(entity.state);
   return (
-    not_off && is_mass && has_queue && connected && updated_recently && has_item
+    not_off &&
+    ((is_mass && has_queue) || external_playback) &&
+    connected &&
+    updated_recently &&
+    has_item
   );
 }
 

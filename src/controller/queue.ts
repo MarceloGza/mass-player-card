@@ -171,8 +171,11 @@ export class QueueController {
     const ents = this.config.entities;
     const ent_id = this.activeMediaPlayer.entity_id;
     const activeEntityConfig = ents.find((item) => item.entity_id == ent_id);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (isActive(this.hass, this.activeMediaPlayer, activeEntityConfig!)) {
+    if (
+      activeEntityConfig &&
+      this.activeMediaPlayer.attributes.active_queue &&
+      isActive(this.hass, this.activeMediaPlayer, activeEntityConfig)
+    ) {
       const queue = await this._getQueue();
       return queue;
     }
