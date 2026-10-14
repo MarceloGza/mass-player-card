@@ -59,6 +59,9 @@ export async function encodeImageIfLocal(
   imageURL: string,
   proxyAll: boolean,
 ): Promise<string> {
+  if (typeof imageURL !== "string" || imageURL.trim().length === 0) {
+    return "";
+  }
   if (!proxyAll) {
     const accessible = getUrlAccessibility(imageURL);
     if (accessible == CheckURLResult.NOT_URL) {
